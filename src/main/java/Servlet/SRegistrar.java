@@ -11,6 +11,8 @@ import Clases.Usuario;
 import javax.servlet.RequestDispatcher;
 import bbdd.BaseDatos;
 
+import static BDPizzas.BDUsuarios.buscar;
+
 @WebServlet(name = "SRegistrar", urlPatterns = {"/SRegistrar"})
 public class SRegistrar extends HttpServlet {
 
@@ -60,16 +62,24 @@ public class SRegistrar extends HttpServlet {
             );
 
             mibase.abrir();
-            exito = BDUsuarios.insertar(u, mibase);
+            Usuario user= buscar(u.getTelefono(), mibase);
             mibase.cerrar();
+            if (user == null) {
+                mibase.abrir();
+                exito = BDUsuarios.insertar(u, mibase);
+                mibase.cerrar();
+            }
         } finally {
             if (exito) {
                 // Redirige a la página de pedidos si el registro fue exitoso
                 request.setAttribute("usuario", u);
+
+                System.out.println("Registro exitoso");
                 rd = request.getRequestDispatcher("/pedido.jsp");
                 rd.forward(request, response);
             } else {
                 // Redirige de vuelta al formulario de registro si falló
+                System.out.println("numero de telefono ya se encuentra registrado");
                 rd = request.getRequestDispatcher("/registro.jsp");
                 rd.forward(request, response);
             }

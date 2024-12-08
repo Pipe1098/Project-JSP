@@ -6,6 +6,7 @@ package Servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -32,13 +33,16 @@ public class SOpcion extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
+        RequestDispatcher rd = null;
         try {
-            Usuario u=(Usuario)request.getAttribute("usuario");
-        String boton=(String)request.getParameter("m");
+            //Usuario u=(Usuario)request.getAttribute("usuario");
+            Usuario u = (Usuario) request.getSession().getAttribute("usuario");
+
+            String boton=(String)request.getParameter("m");
         if(boton.equals("Modificar")){
             String d=(String)request.getParameter("direccion");
             String c=(String)request.getParameter("cpostal");
-            //BaseDatos mibase=new BaseDatos("jdbc:odbc:pizza","sun.jdbc.odbc.JdbcOdbcDriver");
+
 
             BaseDatos mibase = new BaseDatos(
                     "jdbc:mysql://localhost/pizza", // URL de conexión
@@ -46,9 +50,14 @@ public class SOpcion extends HttpServlet {
                     "lfpb10" // Contraseña de la base de datos
             );
             String s=mibase.abrir();
-            int res=BDUsuarios.actualizar(d, c, mibase);
+            int res=BDUsuarios.actualizar(d, c, u.getTelefono(), mibase);
             mibase.cerrar();
+            System.out.println("Actualizacion exitosa");
             }
+        else {
+            rd = request.getRequestDispatcher("/pedido.jsp");
+            rd.forward(request, response);
+        }
         } finally {            
             out.close();
         }

@@ -8,5 +8,7 @@
     <body>
         <h1>Ocurrió un error</h1>
         <p>Mensaje de error: ${error}</p>
+         <br>
+           <a href="/pizzeria/index.jsp">Volver a la página principal</a>
     </body>
 </html>
