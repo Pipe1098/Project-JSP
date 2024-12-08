@@ -59,7 +59,7 @@
         %>
         <h1>Bienvenido</h1>
          <div class="centrar">    
-        <form action="/pizzeria/pedido.jsp" method="POST">
+        <form action="/pizzeria/SOpcion" method="POST">
             <table border="1" cellspacing="1" cellpadding="1"><thead>
                 <tr>
                     <th>Campos</th>

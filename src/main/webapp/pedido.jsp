@@ -1,6 +1,14 @@
 <%@page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@page import="bbdd.BaseDatos" %>
 <%@page import="javax.servlet.http.HttpSession" %>
+<%
+
+    if (session == null || session.getAttribute("usuario") == null) {
+        // Si no hay sesión o no hay un atributo "usuario", redirigir al index.jsp
+        response.sendRedirect("index.jsp");
+        return; // Detener la ejecución del resto del código
+    }
+%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -29,7 +37,7 @@
                             <input type="checkbox" name="ingredientes" value="TOCINETA" /> Tocineta - 5$ <br />
                             <input type="checkbox" name="ingredientes" value="QUESO" /> Queso - 4$ <br />
                             <input type="checkbox" name="ingredientes" value="PEPERONI" /> Peperoni - 3$ <br />
-                            <input type="checkbox" name="ingredientes" value="otro" /> Otro - 1$ <br />
+                            <input type="checkbox" name="ingredientes" value="otro" /> Otro - 16$ <br />
                         </td>
                     </tr>
                     <tr>

@@ -22,20 +22,20 @@ public class SValidar extends HttpServlet {
         BaseDatos mibase = null;
 
         try {
-            // Inicializamos la conexión a la base de datos
+
             mibase = new BaseDatos(
-                    "jdbc:mysql://localhost/pizza", // URL de conexión
-                    "root", // Usuario de la base de datos
-                    "lfpb10" // Contraseña de la base de datos
+                    "jdbc:mysql://localhost/pizza",
+                    "root",
+                    "lfpb10"
             );
             String errorConexion = mibase.abrir();
 
             if (!errorConexion.isEmpty()) {
-                // Si no se puede abrir la base de datos, lanzamos un error
+
                 throw new ServletException("No se pudo abrir la base de datos: " + errorConexion);
             }
 
-            // Obtenemos el parámetro de teléfono enviado desde el formulario
+
             String telefono = request.getParameter("telefono");
             Usuario usuario = BDUsuarios.buscar(telefono, mibase);
 
@@ -52,10 +52,10 @@ public class SValidar extends HttpServlet {
 
             // Guardar el id_usuario en la sesión
             HttpSession session = request.getSession();
-            session.setAttribute("idUsuario", usuario.getId()); // Suponiendo que el método getId() existe en la clase Usuario
+            session.setAttribute("idUsuario", usuario.getId());
 
         } catch (Exception e) {
-            // Manejo de errores: Redirige a una página de error
+
             request.setAttribute("error", e.getMessage());
             rd = request.getRequestDispatcher("/error.jsp");
             rd.forward(request, response);

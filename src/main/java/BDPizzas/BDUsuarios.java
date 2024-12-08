@@ -36,27 +36,30 @@ public class BDUsuarios {
 
 
 	public static boolean insertar(Usuario usuario, BaseDatos BBDD) {
-		String query = "INSERT INTO usuarios (nombre, direccion, cpostal, telefono) VALUES (?, ?, ?, ?)";
-		try (Connection c = BBDD.getConexion();
-			 PreparedStatement ps = c.prepareStatement(query)) {
-			ps.setString(1, usuario.getNombre());
-			ps.setString(2, usuario.getDireccion());
-			ps.setString(3, usuario.getCpostal());
-			ps.setString(4, usuario.getTelefono());
-			ps.executeUpdate();
-			return true;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
+
+			String query = "INSERT INTO usuarios (nombre, direccion, cpostal, telefono) VALUES (?, ?, ?, ?)";
+			try (Connection c = BBDD.getConexion();
+				 PreparedStatement ps = c.prepareStatement(query)) {
+				ps.setString(1, usuario.getNombre());
+				ps.setString(2, usuario.getDireccion());
+				ps.setString(3, usuario.getCpostal());
+				ps.setString(4, usuario.getTelefono());
+				ps.executeUpdate();
+				return true;
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return false;
+			}
+
 	}
 
-	public static int actualizar(String direccion, String telefono, BaseDatos BBDD) {
-		String query = "UPDATE usuarios SET direccion = ? WHERE telefono = ?";
+	public static int actualizar(String direccion, String codigo, String telefono, BaseDatos BBDD) {
+		String query = "UPDATE usuarios SET direccion = ?, cpostal= ? WHERE telefono = ?";
 		try (Connection c = BBDD.getConexion();
 			 PreparedStatement ps = c.prepareStatement(query)) {
 			ps.setString(1, direccion);
-			ps.setString(2, telefono);
+			ps.setString(2, codigo);
+			ps.setString(3, telefono);
 			return ps.executeUpdate(); // Devuelve el número de filas afectadas
 		} catch (SQLException e) {
 			e.printStackTrace();
