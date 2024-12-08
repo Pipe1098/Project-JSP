@@ -40,8 +40,10 @@ public class SValidar extends HttpServlet {
             Usuario usuario = BDUsuarios.buscar(telefono, mibase);
 
             if (usuario == null) {
-                request.setAttribute("error", "Usuario no encontrado para el teléfono: " + telefono);
-                rd = request.getRequestDispatcher("/error.jsp");
+                request.setAttribute("mensaje", "Usuario no encontrado para el teléfono: " + telefono);
+                request.setAttribute("tipoMensaje", "error");
+
+                rd = request.getRequestDispatcher("/index.jsp");
                 rd.forward(request, response);
                 return;
             }

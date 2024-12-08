@@ -35,7 +35,7 @@ public class SOpcion extends HttpServlet {
         PrintWriter out = response.getWriter();
         RequestDispatcher rd = null;
         try {
-            //Usuario u=(Usuario)request.getAttribute("usuario");
+
             Usuario u = (Usuario) request.getSession().getAttribute("usuario");
 
             String boton=(String)request.getParameter("m");
@@ -53,6 +53,13 @@ public class SOpcion extends HttpServlet {
             int res=BDUsuarios.actualizar(d, c, u.getTelefono(), mibase);
             mibase.cerrar();
             System.out.println("Actualizacion exitosa");
+            // Mensaje de éxito
+            request.setAttribute("mensaje", "Actualizacion exitosa");
+            request.setAttribute("tipoMensaje", "exito");
+            request.setAttribute("usuario", u);
+
+            rd = request.getRequestDispatcher("/index.jsp");
+            rd.forward(request, response);
             }
         else {
             rd = request.getRequestDispatcher("/pedido.jsp");

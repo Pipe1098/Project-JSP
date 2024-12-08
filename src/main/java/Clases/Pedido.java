@@ -11,21 +11,22 @@ public class Pedido {
     private static double g = 10, m = 7, p = 4;
     private int cantidad, idPedido, idUsuario;
     private double precio;
-    private String tamanoPizza, total;
+    private String tamanoPizza, total, fecha;
 
     // Ingredientes disponibles
-    private static final String TOCINETA = "Tocineta";
-    private static final String QUESO = "Queso";
-    private static final String PEPERONI = "Peperoni";
-    private static final String otro = "otro";
+    private static final String Tocineta = "Tocineta";
+    private static final String Queso = "Queso";
+    private static final String Peperoni = "Peperoni";
+    private static final String Otro = "otro";
 
-    // Lista de ingredientes para el pedido
+
     private List<String> ingredientes;
 
+    public String getFecha() {
+        return fecha;
+    }
 
-
-
-    public Pedido(int idUsuario, String tamanoPizza, int cantidad, String totalPagar,List<String> ingredientes) {
+    public Pedido(int idUsuario, String tamanoPizza, int cantidad, String totalPagar, List<String> ingredientes) {
         this.idUsuario = idUsuario;
         this.tamanoPizza = tamanoPizza;
         this.cantidad = cantidad;
@@ -33,22 +34,32 @@ public class Pedido {
         this.ingredientes = ingredientes;
     }
 
-    // Getters y setters para ingredientes
-    public String getIngredientes() {
-        return ingredientes.toString();
+    public Pedido(int idUsuario, String tamanoPizza, int cantidad, String totalPagar, String fecha, List<String> ingredientes) {
+        this.idUsuario = idUsuario;
+        this.tamanoPizza = tamanoPizza;
+        this.cantidad = cantidad;
+        this.total = totalPagar;
+        this.ingredientes = ingredientes;
+        this.fecha=fecha;
     }
+
+
+    public String getIngredientes() {
+
+        if (ingredientes == null || ingredientes.isEmpty()) {
+            return "Sin adiciones";
+        }
+
+        String var = ingredientes.toString();
+        String var2= var.replace("["," ");
+        return var2.replace("]"," ");
+    }
+
 
     public void setIngredientes(List<String> ingredientes) {
         this.ingredientes = ingredientes;
     }
 
-    public void agregarIngrediente(String ingrediente) {
-        if (ingrediente.equals(TOCINETA) || ingrediente.equals(QUESO) || ingrediente.equals(PEPERONI)) {
-            this.ingredientes.add(ingrediente);
-        } else {
-            throw new IllegalArgumentException("Ingrediente no válido: " + ingrediente);
-        }
-    }
 
     public void eliminarIngrediente(String ingrediente) {
         this.ingredientes.remove(ingrediente);
@@ -116,24 +127,24 @@ public class Pedido {
 
         // Calcular el costo adicional por los ingredientes si vienen definidos
         if (ingredientes != null && !ingredientes.isEmpty()) {
-            if (ingredientes.contains("TOCINETA")) {
+            if (ingredientes.contains("Tocineta")) {
                 res += 5;
             }
-            if (ingredientes.contains("QUESO")) {
+            if (ingredientes.contains("Queso")) {
                 res += 4;
             }
-            if (ingredientes.contains("PEPERONI")) {
+            if (ingredientes.contains("Peperoni")) {
                 res += 3;
             }
-            if (ingredientes.contains("otro")) {
+            if (ingredientes.contains("Otro")) {
                 res += 1;
             }
         }
 
-        // Almacenar el total en el atributo `total`
+
         this.total = String.format("%.2f", res) + "$";
 
-        // Devolver el total formateado
+
         return this.total;
     }
 

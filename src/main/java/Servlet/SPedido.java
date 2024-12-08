@@ -3,12 +3,15 @@ package Servlet;
 import BDPizzas.BDPedidos;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import Clases.Pedido;
 import bbdd.BaseDatos;
 
@@ -18,86 +21,147 @@ public class SPedido extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        String totalImporte = ""; // Variable para el total del pedido
-        RequestDispatcher rd = null; // Para redirección de páginas
-        boolean exito = false; // Indicador de éxito en el guardado del pedido
+        String totalImporte = "";
+        RequestDispatcher rd = null;
+        boolean exito = false;
 
         try {
-            // Validación de parámetro "pizza"
+            // Validación de parámetros
             String tipo = request.getParameter("pizza");
             if (tipo == null || tipo.isEmpty()) {
-                throw new IllegalArgumentException("El tipo de pizza no puede estar vacío.");
+                request.setAttribute("mensaje", "El tipo de pizza no puede estar vacío");
+                request.setAttribute("tipoMensaje", "error");
+                rd = request.getRequestDispatcher("/pedido.jsp");
+                rd.forward(request, response);
+                return;
             }
 
             String[] ingredientesSeleccionados = request.getParameterValues("ingredientes");
 
-            // Validación de parámetro "c" (cantidad)
+            if (ingredientesSeleccionados == null) {
+                ingredientesSeleccionados = new String[0];
+            }
+
+
+
             String cantidadParam = request.getParameter("c");
+
             if (cantidadParam == null || cantidadParam.isEmpty()) {
-                throw new IllegalArgumentException("Debe especificar una cantidad.");
+                request.setAttribute("mensaje", "Debe especificar una cantidad");
+                request.setAttribute("tipoMensaje", "error");
+                rd = request.getRequestDispatcher("/pedido.jsp");
+                rd.forward(request, response);
+                return;
             }
 
-            // Conversión de cantidad a entero
-            int cantidad = Integer.parseInt(cantidadParam);
-            if (cantidad <= 0) {
-                throw new IllegalArgumentException("La cantidad debe ser un número positivo.");
+            int cantidad;
+            try {
+                cantidad = Integer.parseInt(cantidadParam);
+                if (cantidad <= 0) {
+                    throw new NumberFormatException("Cantidad menor o igual a 0");
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("mensaje", "La cantidad debe ser un número mayor a 0");
+                request.setAttribute("tipoMensaje", "error");
+                rd = request.getRequestDispatcher("/pedido.jsp");
+                rd.forward(request, response);
+                return;
             }
+
             Integer idUsuario = (Integer) request.getSession().getAttribute("idUsuario");
+            if (idUsuario == null) {
+                request.setAttribute("mensaje", "Debe iniciar sesión para realizar un pedido");
+                request.setAttribute("tipoMensaje", "error");
+                rd = request.getRequestDispatcher("/index.jsp");
+                rd.forward(request, response);
+                return;
+            }
 
-            // Crear un objeto Pedido y calcular el importe total
-            Pedido pedido = new Pedido (idUsuario,tipo,cantidad,totalImporte, Arrays.asList(ingredientesSeleccionados));
-            totalImporte = pedido.getTotalImporte(tipo, Arrays.asList(ingredientesSeleccionados).toString());
+            Pedido pedido = new Pedido(idUsuario, tipo, cantidad, "", Arrays.asList(ingredientesSeleccionados));
+            totalImporte = pedido.getTotalImporte(tipo, Arrays.toString(ingredientesSeleccionados));
             pedido.setTotal(totalImporte);
 
-            // Guardar el pedido en la base de datos
-            BaseDatos mibase = new BaseDatos(
-                    "jdbc:mysql://localhost/pizza", // URL de conexión
-                    "root", // Usuario de la base de datos
-                    "lfpb10" // Contraseña de la base de datos
-            );
 
-            String conexionAbierta = mibase.abrir();
-            if (conexionAbierta != null) {
+            BaseDatos mibase = null;
+            try {
+                mibase = new BaseDatos("jdbc:mysql://localhost/pizza", "root", "lfpb10");
+                mibase.abrir();
                 exito = BDPedidos.insertar(pedido, mibase);
-                mibase.cerrar();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (mibase != null) {
+                    try {
+                        mibase.cerrar();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
 
-            // Redirigir a la página de factura si se guarda correctamente
+
             if (exito) {
                 request.setAttribute("t", totalImporte);
+                request.setAttribute("mensaje", "Pedido creado con éxito");
+                request.setAttribute("tipoMensaje", "exito");
                 rd = request.getRequestDispatcher("/factura.jsp");
+                rd.forward(request, response);
+
             } else {
-                throw new Exception("No se pudo guardar el pedido en la base de datos.");
-            }
-
-        } catch (NumberFormatException e) {
-            // Error al convertir la cantidad a número
-            request.setAttribute("error", "La cantidad debe ser un número válido.");
-            rd = request.getRequestDispatcher("/error.jsp");
-
-        } catch (IllegalArgumentException e) {
-            // Error de validación de parámetros
-            request.setAttribute("error", e.getMessage());
-            rd = request.getRequestDispatcher("/error.jsp");
-
-        } catch (Exception e) {
-            // Manejo de cualquier otro error inesperado
-            request.setAttribute("error", "Ha ocurrido un error: " + e.getMessage());
-            rd = request.getRequestDispatcher("/error.jsp");
-
-        } finally {
-            // Forward a la página correspondiente
-            if (rd != null) {
+                request.setAttribute("mensaje", "No se pudo guardar el pedido en la base de datos.");
+                request.setAttribute("tipoMensaje", "error");
+                rd = request.getRequestDispatcher("/pedido.jsp");
                 rd.forward(request, response);
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("mensaje", "Ha ocurrido un error inesperado: " + e.getMessage());
+            request.setAttribute("tipoMensaje", "error");
+            rd = request.getRequestDispatcher("/error.jsp");
+
         }
+
     }
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        HttpSession session = request.getSession();
+        if (session == null || session.getAttribute("usuario") == null) {
+            response.sendRedirect("index.jsp");
+            return;
+        }
+
+        Integer idUsuario = (Integer) session.getAttribute("idUsuario");
+
+        // Obtener la opción de ver pedidos
+        String verPedidos = request.getParameter("verPedidos");
+        if ("true".equals(verPedidos)) {
+            // Si el usuario quiere ver los pedidos
+            BaseDatos mibase = null;
+            try {
+                mibase = new BaseDatos("jdbc:mysql://localhost/pizza", "root", "lfpb10");
+                mibase.abrir();
+                List<Pedido> pedidos = BDPedidos.obtenerPedidosUsuario(idUsuario, mibase);
+                request.setAttribute("pedidos", pedidos);
+                request.getRequestDispatcher("pedido.jsp").forward(request, response); // Redirigir a la página de pedidos
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.getWriter().println("<p>Error al obtener los pedidos: " + e.getMessage() + "</p>");
+            } finally {
+                if (mibase != null) {
+                    try {
+                        mibase.cerrar();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
     }
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)

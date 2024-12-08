@@ -72,14 +72,19 @@ public class SRegistrar extends HttpServlet {
         } finally {
             if (exito) {
                 // Redirige a la página de pedidos si el registro fue exitoso
+
+                // Mensaje de éxito
+                request.setAttribute("mensaje", "Registro exitoso. ¡Bienvenido!");
+                request.setAttribute("tipoMensaje", "exito");
                 request.setAttribute("usuario", u);
 
-                System.out.println("Registro exitoso");
-                rd = request.getRequestDispatcher("/pedido.jsp");
+                rd = request.getRequestDispatcher("/registro.jsp");
                 rd.forward(request, response);
             } else {
                 // Redirige de vuelta al formulario de registro si falló
-                System.out.println("numero de telefono ya se encuentra registrado");
+                request.setAttribute("mensaje", "El número de teléfono ya se encuentra registrado.");
+                request.setAttribute("tipoMensaje", "error");
+
                 rd = request.getRequestDispatcher("/registro.jsp");
                 rd.forward(request, response);
             }
